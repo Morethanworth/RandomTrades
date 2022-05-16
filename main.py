@@ -53,4 +53,3 @@ while True:
     if clock.is_open :
         comprar(simbolo,dinheiro_investido)
         time.sleep(86400)
-
