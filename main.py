@@ -1,6 +1,8 @@
 import csv
 import random
 import alpaca_trade_api as tradeapi
+import time
+
 
 API_KEY_ID = "PKFFMUICOK45Q9JLX0KZ"
 SECRET_KEY = "jrgZrwXJ62ChrIsbTlfI2sHxTcXiGyFK6n5ccTXz"
@@ -18,18 +20,20 @@ simbolo = rows[numero_random][0]
 
 api = tradeapi.REST(API_KEY_ID, SECRET_KEY, APCA_API_BASE_URL)
 
+clock = api.get_clock()
+
 def comprar(simbolo,dinheiro_investido):
     api.cancel_all_orders()
     account = api.get_account()
     dinheiro = account.buying_power
     if (int(dinheiro) > dinheiro_investido):
         percentagem_lucro = (int(dinheiro)/dinheiro_investido) * 100
-        print("\nLucrei " + str(percentagem_lucro) + "%")
+        print("\nLucrei " + str(percentagem_lucro) + "%\n")
     elif (int(dinheiro) < dinheiro_investido):
         percentagem_lucro = (dinheiro_investido / int(dinheiro)) * 100
-        print("\nPerdi " + str(percentagem_lucro) + "%")
+        print("\nPerdi " + str(percentagem_lucro) + "%\n")
     else:
-        print("\nFiquei na mesma")
+        print("Fiquei na mesma\n")
     if int(dinheiro) != 0:
         api.submit_order(
             symbol = simbolo,
@@ -44,4 +48,9 @@ def comprar(simbolo,dinheiro_investido):
     return dinheiro_investido
 
 dinheiro_investido = 200000
-comprar(simbolo,dinheiro_investido)
+
+while True:
+    if clock.is_open :
+        comprar(simbolo,dinheiro_investido)
+        time.sleep(86400)
+
