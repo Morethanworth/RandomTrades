@@ -2,11 +2,16 @@ import csv
 import random
 import alpaca_trade_api as tradeapi
 import time
+import yaml
 
 
-API_KEY_ID = "PKFFMUICOK45Q9JLX0KZ"
-SECRET_KEY = "jrgZrwXJ62ChrIsbTlfI2sHxTcXiGyFK6n5ccTXz"
-APCA_API_BASE_URL = "https://paper-api.alpaca.markets"
+CONFIG_FILE = 'auth.yaml'
+
+with open(CONFIG_FILE, 'r') as config_file:
+    config = yaml.safe_load(config_file)
+    API_KEY_ID = config['alpaca']['API_KEY_ID']
+    SECRET_KEY = config['alpaca']['SECRET_KEY']
+    APCA_API_BASE_URL = config['alpaca']['APCA_API_BASE_URL']
 
 
 with open('constituents_csv.csv', 'r') as file:
@@ -23,31 +28,35 @@ api = tradeapi.REST(API_KEY_ID, SECRET_KEY, APCA_API_BASE_URL)
 clock = api.get_clock()
 
 def comprar(simbolo,dinheiro_investido):
-    api.cancel_all_orders()
+    api.close_all_positions()
+    time.sleep(2)
     account = api.get_account()
-    dinheiro = account.buying_power
-    if (int(dinheiro) > dinheiro_investido):
-        percentagem_lucro = (int(dinheiro)/dinheiro_investido) * 100
-        print("\nLucrei " + str(percentagem_lucro) + "%\n")
-    elif (int(dinheiro) < dinheiro_investido):
-        percentagem_lucro = (dinheiro_investido / int(dinheiro)) * 100
-        print("\nPerdi " + str(percentagem_lucro) + "%\n")
+    dinheiro = int(float(account.buying_power))
+    if dinheiro > dinheiro_investido:
+        percentagem_lucro = (dinheiro/dinheiro_investido * 100)-100
+        percentagem_lucro = round(percentagem_lucro, 2)
+        print("Lucrei " + str(percentagem_lucro) + "%")
+    elif dinheiro < dinheiro_investido:
+        percentagem_lucro = (dinheiro_investido /dinheiro * 100)-100
+        percentagem_lucro = round(percentagem_lucro, 2)
+        print("Perdi " + str(percentagem_lucro) + "%")
     else:
         print("Fiquei na mesma\n")
-    if int(dinheiro) != 0:
+    if dinheiro != 0:
         api.submit_order(
             symbol = simbolo,
             notional = dinheiro,
             side='buy',
             type='market',
             time_in_force= "day")
-        print("\nComprei " + dinheiro + " dollars de " + simbolo)
-        dinheiro_investido = dinheiro
+        print("Comprei " + str(dinheiro) + " dollars de " + simbolo)
     else:
         print("Erro: dinheiro = 0")
-    return dinheiro_investido
 
 dinheiro_investido = 200000
+
+
+comprar(simbolo,dinheiro_investido)
 
 while True:
     if clock.is_open :
