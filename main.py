@@ -3,7 +3,9 @@ import random
 import alpaca_trade_api as tradeapi
 import time
 import yaml
+import tweepy
 from pushbullet import Pushbullet
+
 
 #imports the api keys
 CONFIG_FILE = 'auth.yaml'
@@ -13,7 +15,16 @@ with open(CONFIG_FILE, 'r') as config_file:
     SECRET_KEY = config['alpaca']['SECRET_KEY']
     APCA_API_BASE_URL = config['alpaca']['APCA_API_BASE_URL']
     Pushbullet_API_KEY = config['pushbullet']['API_KEY']
+    twitter_consumer_key = config['twitter']['API Key']
+    twitter_consumer_secret = config['twitter']['API Key Secret']
+    twitter_access_token = config['twitter']['Access Token']
+    twitter_access_token_secret = config['twitter']['Access Token Secret']
 
+
+auth = tweepy.OAuthHandler(twitter_consumer_key, twitter_consumer_secret)
+auth.set_access_token(twitter_access_token, twitter_access_token_secret)
+
+twitter_api = tweepy.API(auth)
 #setup of the Pushbullet Api
 pb = Pushbullet(Pushbullet_API_KEY)
 
@@ -29,9 +40,9 @@ numero_random = random.randrange(1,len(rows))
 symbol = rows[numero_random][0]
 
 #setup for the alpaca API
-api = tradeapi.REST(API_KEY_ID, SECRET_KEY, APCA_API_BASE_URL)
+alpaca_api = tradeapi.REST(API_KEY_ID, SECRET_KEY, APCA_API_BASE_URL)
 
-clock = api.get_clock()
+clock = alpaca_api.get_clock()
 
 
 def profit(money):
@@ -50,13 +61,13 @@ def profit(money):
 
 #function that buys the stock
 def buy(symbol):
-    api.close_all_positions()
+    alpaca_api.close_all_positions()
     time.sleep(2)
-    account = api.get_account()
+    account = alpaca_api.get_account()
     money = int(float(account.buying_power))
     profit_message = profit(money)
     if money != 0:
-        api.submit_order(
+        alpaca_api.submit_order(
             symbol = symbol,
             notional = money,
             side='buy',
@@ -65,12 +76,11 @@ def buy(symbol):
         print("Bought " + str(money) + " USD of " + rows[numero_random][1] + " (" + symbol +").\n" + profit_message)
         push = pb.push_note("RandomTradeBot", "Bought " + str(money) + " USD of " + 
                             rows[numero_random][1] + " (" + symbol +").\n" + profit_message)
+        twitter_api.update_status("Bought " + str(money) + " USD of " + rows[numero_random][1] + " (" + symbol +").\n" + profit_message)
     else:
         print("Error: money = 0")
 
-
-
-buy(symbol)
+#buy(symbol)
 
 #while True:
 #    if clock.is_open :
