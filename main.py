@@ -4,8 +4,10 @@ import alpaca_trade_api as tradeapi
 import time
 import yaml
 import tweepy
+from datetime import date
 from pushbullet import Pushbullet
 
+history_file = 'history.txt'
 
 #imports the api keys
 CONFIG_FILE = 'auth.yaml'
@@ -64,6 +66,14 @@ def twitter_pushbullet(str):
     push = pb.push_note("RandomTradeBot", str)
     twitter_api.update_status(str)
 
+def update_history(money):
+    day = date.today()
+    date_month = str(day.day) + "/" + str(day.month)
+    with open("history.txt", 'a') as f:
+        line = date_month + ";" + str(money) + ";" + symbol
+        f.write(line)
+        f.write('\n')
+
 #function that buys the stock
 def buy(symbol):
     alpaca_api.close_all_positions()
@@ -79,11 +89,11 @@ def buy(symbol):
             type='market',
             time_in_force= "day")
         twitter_pushbullet("Bought " + str(money) + " USD of " + rows[numero_random][1] + " (" + symbol +").\n" + profit_message)
+        update_history(money)
     else:
         print("Error: money = 0")
 
-#buy(symbol)
-
+buy(symbol)
 
 #while True:
 #    if clock.is_open :
