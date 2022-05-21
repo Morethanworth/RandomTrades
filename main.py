@@ -59,6 +59,11 @@ def profit(money):
     else:
         return"Stayed at the same"
 
+def twitter_pushbullet(str):
+    print(str)
+    push = pb.push_note("RandomTradeBot", str)
+    twitter_api.update_status(str)
+
 #function that buys the stock
 def buy(symbol):
     alpaca_api.close_all_positions()
@@ -73,14 +78,12 @@ def buy(symbol):
             side='buy',
             type='market',
             time_in_force= "day")
-        print("Bought " + str(money) + " USD of " + rows[numero_random][1] + " (" + symbol +").\n" + profit_message)
-        push = pb.push_note("RandomTradeBot", "Bought " + str(money) + " USD of " + 
-                            rows[numero_random][1] + " (" + symbol +").\n" + profit_message)
-        twitter_api.update_status("Bought " + str(money) + " USD of " + rows[numero_random][1] + " (" + symbol +").\n" + profit_message)
+        twitter_pushbullet("Bought " + str(money) + " USD of " + rows[numero_random][1] + " (" + symbol +").\n" + profit_message)
     else:
         print("Error: money = 0")
 
 #buy(symbol)
+
 
 #while True:
 #    if clock.is_open :
