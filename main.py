@@ -1,5 +1,6 @@
 import csv
 import random
+from turtle import position
 import alpaca_trade_api as tradeapi
 import time
 import yaml
@@ -48,18 +49,20 @@ clock = alpaca_api.get_clock()
 
 
 def profit(money):
+    if money == 0:
+        return " "
     #insert here your starting money
-    starting_money = 200000
+    starting_money = 100000
     if money > starting_money:
-        profit = (money/starting_money * 100) - 100
+        profit = ((money/starting_money) * 100) - 100
         profit = round(profit, 2)
-        return "🟢Profited +" + str(profit) + "%🟢"
+        return "+" + str(profit) + "%🟢"
     elif money < starting_money:
-        profit = (starting_money /money * 100)-100
+        profit = ((starting_money /money) * 100)-100
         profit = round(profit, 2)
-        return"🔴Lost -" + str(profit) + "%🔴"
+        return"-" + str(profit) + "%🔴"
     else:
-        return"Stayed at the same"
+        return"No change"
 
 def twitter_pushbullet(str):
     print(str)
@@ -77,7 +80,7 @@ def update_history(money):
 #function that buys the stock
 def buy(symbol):
     alpaca_api.close_all_positions()
-    time.sleep(2)
+    time.sleep(10)
     account = alpaca_api.get_account()
     money = int(float(account.buying_power))
     profit_message = profit(money)
@@ -88,7 +91,7 @@ def buy(symbol):
             side='buy',
             type='market',
             time_in_force= "day")
-        twitter_pushbullet("Bought " + str(money) + " USD of " + rows[numero_random][1] + " (" + symbol +").\n" + profit_message)
+        twitter_pushbullet("Bought " + str(money) + " USD of " + rows[numero_random][1] + " $" + symbol +"\n" + profit_message)
         update_history(money)
     else:
         print("Error: money = 0")
