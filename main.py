@@ -82,7 +82,7 @@ def buy(symbol):
     alpaca_api.close_all_positions()
     time.sleep(10)
     account = alpaca_api.get_account()
-    money = int(float(account.buying_power))
+    money = int(float(account.cash))
     profit_message = profit(money)
     if money != 0:
         alpaca_api.submit_order(
