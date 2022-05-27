@@ -1,5 +1,6 @@
 import csv
 import random
+from re import L
 from turtle import position
 import alpaca_trade_api as tradeapi
 import time
@@ -30,6 +31,7 @@ auth.set_access_token(twitter_access_token, twitter_access_token_secret)
 twitter_api = tweepy.API(auth)
 #setup of the Pushbullet Api
 pb = Pushbullet(Pushbullet_API_KEY)
+
 
 #reads the csv and puts the values on a list
 with open('constituents_csv.csv', 'r') as file:
@@ -97,10 +99,11 @@ def buy(symbol):
         print("Error: money = 0")
 
 buy(symbol)
-
-#while True:
-#    if clock.is_open :
-#        buy(symbol)
-#    
-#    time.sleep(86400)
-
+"""
+#uncomment this code when the code is running 24/7
+while True:
+    if clock.is_open :
+        buy(symbol)
+            
+    time.sleep(86400)
+"""
