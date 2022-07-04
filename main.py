@@ -1,11 +1,9 @@
 import csv
-import random
-from re import L
-from turtle import position
-import alpaca_trade_api as tradeapi
 import time
-import yaml
 import tweepy
+import random
+import yaml
+import alpaca_trade_api as tradeapi
 from datetime import date
 from pushbullet import Pushbullet
 
