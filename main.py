@@ -48,7 +48,7 @@ alpaca_api = tradeapi.REST(API_KEY_ID, SECRET_KEY, APCA_API_BASE_URL)
 clock = alpaca_api.get_clock()
 
 
-def profit(money):
+def profit_begin(money):
     if money == 0:
         return " "
     #insert here your starting money
@@ -56,13 +56,18 @@ def profit(money):
     if money > starting_money:
         profit = ((money/starting_money) * 100) - 100
         profit = round(profit, 2)
-        return "+" + str(profit) + "%🟢"
+        return "Profit since begining: +" + str(profit) + "%🟢\n"
     elif money < starting_money:
         profit = ((starting_money /money) * 100)-100
         profit = round(profit, 2)
-        return"-" + str(profit) + "%🔴"
+        return"Profit since begining: -" + str(profit) + "%🔴\n"
     else:
-        return"No change"
+        return"Profit since begining: no change\n"
+
+#read from txt file
+#def profit_yesterday(money)
+    
+
 
 def twitter_pushbullet(str):
     print(str)
@@ -75,7 +80,7 @@ def update_history(money):
     with open("history.txt", 'a') as f:
         line = date_month + ";" + str(money) + ";" + symbol
         f.write(line)
-        f.write('\n')
+        f.write('\n')   
 
 #function that buys the stock
 def buy(symbol):
@@ -83,7 +88,8 @@ def buy(symbol):
     time.sleep(10)
     account = alpaca_api.get_account()
     money = int(float(account.cash))
-    profit_message = profit(money)
+    profit_message_begin = profit_begin(money)
+    #profit_message_yesterday = profit_yesterday(money)
     if money != 0:
         alpaca_api.submit_order(
             symbol = symbol,
@@ -91,7 +97,7 @@ def buy(symbol):
             side='buy',
             type='market',
             time_in_force= "day")
-        twitter_pushbullet("Bought " + str(money) + " USD of " + rows[numero_random][1] + " $" + symbol +"\n" + profit_message)
+        twitter_pushbullet("Bought " + str(money) + " USD of " + rows[numero_random][1] + " $" + symbol +"\n" + profit_message_begin )
         update_history(money)
     else:
         print("Error: money = 0")
