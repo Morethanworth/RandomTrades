@@ -6,8 +6,16 @@ import yaml
 import alpaca_trade_api as tradeapi
 from datetime import date
 from pushbullet import Pushbullet
+from urllib.request import urlopen
+import json
 
 history_file = 'history.txt'
+
+def get_jsonparsed_data(url):
+    response = urlopen(url)
+    data = response.read()
+    return json.loads(data)
+
 
 #imports the api keys
 CONFIG_FILE = 'auth.yaml'
@@ -107,7 +115,11 @@ def buy(symbol):
     else:
         print("Error: money = 0")
 
-buy(symbol)
+#buy(symbol)
+
+url = ("https://financialmodelingprep.com/api/v3/profile/" + symbol + "?apikey=c4d832fff8d794cf22fe3684211f7cb8")
+data = get_jsonparsed_data(url)
+print(data[0]["address"])
 """
 #uncomment this code when the code is running 24/7
 while True:
