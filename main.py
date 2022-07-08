@@ -48,25 +48,28 @@ alpaca_api = tradeapi.REST(API_KEY_ID, SECRET_KEY, APCA_API_BASE_URL)
 clock = alpaca_api.get_clock()
 
 
-def profit_begin(money):
-    if money == 0:
+def profits(money_now,money_before):
+    if money_now == 0:
         return " "
     #insert here your starting money
-    starting_money = 100000
-    if money > starting_money:
-        profit = ((money/starting_money) * 100) - 100
+    if money_now > money_before:
+        profit = ((money_now/money_before) * 100) - 100
         profit = round(profit, 2)
-        return "Profit since begining: +" + str(profit) + "%🟢\n"
-    elif money < starting_money:
-        profit = ((starting_money /money) * 100)-100
+        return "+" + str(profit) + "%🟢\n"
+    elif money_now < money_before:
+        profit = ((money_before /money_now) * 100)-100
         profit = round(profit, 2)
-        return"Profit since begining: -" + str(profit) + "%🔴\n"
+        return"-" + str(profit) + "%🔴\n"
     else:
-        return"Profit since begining: no change\n"
+        return"no change\n"
 
-#read from txt file
-#def profit_yesterday(money)
+
+def money_yesterday():
+    with open('history.txt') as f:
+        last_line = f.readlines()[-1]
+        money = last_line.split(";")
     
+    return money[1]
 
 
 def twitter_pushbullet(str):
@@ -84,12 +87,13 @@ def update_history(money):
 
 #function that buys the stock
 def buy(symbol):
-    alpaca_api.close_all_positions()
+    yesterday_money = money_yesterday()
+    alpaca_api.close_all_positions()    
     time.sleep(10)
     account = alpaca_api.get_account()
     money = int(float(account.cash))
-    profit_message_begin = profit_begin(money)
-    #profit_message_yesterday = profit_yesterday(money)
+    profit_message_begin = profits(money,100000)
+    profit_yesterday = profits(money,int(yesterday_money))
     if money != 0:
         alpaca_api.submit_order(
             symbol = symbol,
@@ -97,7 +101,8 @@ def buy(symbol):
             side='buy',
             type='market',
             time_in_force= "day")
-        twitter_pushbullet("Bought " + str(money) + " USD of " + rows[numero_random][1] + " $" + symbol +"\n" + profit_message_begin )
+        twitter_pushbullet("Bought " + str(money) + " USD of " + rows[numero_random][1] + " $" + symbol + "\n" + "Change all time:" + 
+                                profit_message_begin + "Change yesterday:" + profit_yesterday )
         update_history(money)
     else:
         print("Error: money = 0")
