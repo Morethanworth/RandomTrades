@@ -6,16 +6,16 @@ import yaml
 import alpaca_trade_api as tradeapi
 from datetime import date
 from pushbullet import Pushbullet
-from urllib.request import urlopen
+import urllib.request
 import json
+
 
 history_file = 'history.txt'
 
 def get_jsonparsed_data(url):
-    response = urlopen(url)
+    response = urllib.request.urlopen(url)
     data = response.read()
     return json.loads(data)
-
 
 #imports the api keys
 CONFIG_FILE = 'auth.yaml'
@@ -83,7 +83,9 @@ def money_yesterday():
 def twitter_pushbullet(str):
     print(str)
     push = pb.push_note("RandomTradeBot", str)
-    twitter_api.update_status(str)
+    tweet = twitter_api.update_status_with_media(str, "logo.png")
+    twitter_api.update_status(status,in_reply_to_status_id=tweet.id)
+    
 
 def update_history(money):
     day = date.today()
@@ -119,7 +121,18 @@ def buy(symbol):
 
 url = ("https://financialmodelingprep.com/api/v3/profile/" + symbol + "?apikey=c4d832fff8d794cf22fe3684211f7cb8")
 data = get_jsonparsed_data(url)
-print(data[0]["address"])
+address = data[0]["address"]
+city = data[0]["city"]
+state = data[0]["state"]
+price = data[0]["price"]
+industry = data[0]["industry"]
+website = data[0]["website"]
+ceo = data[0]["ceo"]
+employees = data[0]["fullTimeEmployees"]
+imageurl = data[0]["image"] 
+urllib.request.urlretrieve(imageurl, "logo.png")
+status = "STOCK INFO\nIndustry: " + industry + "\nStock price: " + str(price) + "$" +  "\nAddress: " + address + ", "+ city + ", "+ state + "\nCEO: " + ceo + "\nNumber of employees: " + employees + "\n" + website
+twitter_pushbullet("OI")
 """
 #uncomment this code when the code is running 24/7
 while True:
